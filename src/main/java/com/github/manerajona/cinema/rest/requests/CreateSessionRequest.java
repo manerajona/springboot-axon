@@ -1,4 +1,4 @@
-package com.github.manerajona.cinema.ports.input.rest.requests;
+package com.github.manerajona.cinema.rest.requests;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

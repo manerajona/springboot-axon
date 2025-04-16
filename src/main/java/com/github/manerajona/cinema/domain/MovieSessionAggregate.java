@@ -60,7 +60,7 @@ public class MovieSessionAggregate {
     }
 
     @CommandHandler
-    public void handle(BookSeatsCommand command) {
+    public BookingRef handle(BookSeatsCommand command) {
         // Validate that all requested seats exist
         Set<Seat> nonExistingSeats = command.requestedSeats().stream()
                 .filter(seat -> seat.row() > seatingPlan.maxRow() || seat.col() > seatingPlan.maxCol())
@@ -86,12 +86,13 @@ public class MovieSessionAggregate {
 
         // Apply the event to record the booking
         AggregateLifecycle.apply(new SeatsBookedEvent(LocalDate.now(), this.id, bookingRef, command.customerId(), command.requestedSeats()));
+
+        return bookingRef;
     }
 
     @EventSourcingHandler
     public void on(SeatsBookedEvent event) {
-        Booking booking = Booking.create(event.bookingRef(), event.customerId(), event.seats());
-        this.bookings.add(booking);
+        this.bookings.add(new Booking(event.bookingRef(), event.customerId(), event.seats()));
         this.aggregateVersion++;
     }
 }

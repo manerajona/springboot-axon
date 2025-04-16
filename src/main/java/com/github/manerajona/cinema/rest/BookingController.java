@@ -1,17 +1,18 @@
-package com.github.manerajona.cinema.ports.input.rest;
+package com.github.manerajona.cinema.rest;
 
 import com.github.manerajona.cinema.domain.commands.BookSeatsCommand;
 import com.github.manerajona.cinema.domain.entities.Seat;
 import com.github.manerajona.cinema.domain.vo.BookingRef;
 import com.github.manerajona.cinema.domain.vo.CustomerId;
 import com.github.manerajona.cinema.domain.vo.MovieSessionId;
-import com.github.manerajona.cinema.ports.input.rest.requests.BookSeatsRequest;
-import com.github.manerajona.cinema.ports.input.rest.requests.SeatRequest;
+import com.github.manerajona.cinema.rest.requests.BookSeatsRequest;
+import com.github.manerajona.cinema.rest.requests.SeatRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,9 +26,9 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingRef bookSeats(@PathVariable String id, @RequestBody BookSeatsRequest request) {
+    public CompletableFuture<BookingRef> bookSeats(@PathVariable String id, @RequestBody BookSeatsRequest request) {
         final UUID movieSessionId = UUID.fromString(id);
-        return commandGateway.sendAndWait(bookSeatsRequestToBookSeatsCommand(movieSessionId, request));
+        return commandGateway.send(bookSeatsRequestToBookSeatsCommand(movieSessionId, request));
     }
 
     private static BookSeatsCommand bookSeatsRequestToBookSeatsCommand(UUID movieSessionId, BookSeatsRequest request) {

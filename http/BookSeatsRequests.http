@@ -11,23 +11,23 @@ Content-Type: application/json
   "row": 50
 }
 
-### Book seat
-POST http://localhost:8080/movie-sessions/9a06ffc9-81f8-438d-8424-0d8e3b708a61/bookings
+### Book Seats
+POST http://localhost:8080/movie-sessions/2aec0b67-08af-4241-9834-9dfb2fa1db98/bookings
 Content-Type: application/json
 
 {
   "customerId": "a07ef105-35da-4a88-a0a5-b0372ac98e88",
   "requestedSeats": [
     {
-      "col": 10,
+      "col": 11,
       "row": 20
     },
     {
-      "col": 10,
+      "col": 11,
       "row": 21
     }
   ]
 }
 
-### Get by ref
-GET http://localhost:8080/seats/32e5562a-aa2b-40d4-9daa-8542e8fe22db
+### Get Booking by Code
+GET http://localhost:8080/movie-sessions/2aec0b67-08af-4241-9834-9dfb2fa1db98/bookings/1963FD42903

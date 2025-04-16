@@ -19,9 +19,10 @@ class AxonInMemoryConfig {
     }
 
     @Bean
-    EmbeddedEventStore eventStore(EventStorageEngine storageEngine,
-                                  @Value("${com.github.manerajona.cinema.eventstore.name}") String eventStoreName,
-                                  org.axonframework.config.Configuration axonConfiguration) {
+    EmbeddedEventStore eventStore(
+            EventStorageEngine storageEngine,
+            org.axonframework.config.Configuration axonConfiguration,
+            @Value("${com.github.manerajona.cinema.eventstore.name}") String eventStoreName) {
         return EmbeddedEventStore.builder()
                 .storageEngine(storageEngine)
                 .messageMonitor(axonConfiguration.messageMonitor(EventStore.class, eventStoreName))

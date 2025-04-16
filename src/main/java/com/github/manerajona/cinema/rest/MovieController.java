@@ -1,8 +1,8 @@
-package com.github.manerajona.cinema.ports.input.rest;
+package com.github.manerajona.cinema.rest;
 
 import com.github.manerajona.cinema.domain.commands.CreateMovieSessionCommand;
 import com.github.manerajona.cinema.domain.vo.*;
-import com.github.manerajona.cinema.ports.input.rest.requests.CreateSessionRequest;
+import com.github.manerajona.cinema.rest.requests.CreateSessionRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +26,7 @@ public class MovieController {
     @PostMapping
     public ResponseEntity<Void> createSession(@RequestBody CreateSessionRequest request) {
         final UUID movieSessionId = UUID.randomUUID();
-        commandGateway.sendAndWait(createSessionRequestCreateSessionCommand(movieSessionId, request));
+        commandGateway.send(createSessionRequestCreateSessionCommand(movieSessionId, request));
         return ResponseEntity.created(URI.create("/movie-sessions/" + movieSessionId)).build();
     }
 
