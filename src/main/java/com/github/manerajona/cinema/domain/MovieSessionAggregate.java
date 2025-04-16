@@ -9,23 +9,19 @@ import com.github.manerajona.cinema.domain.errors.SeatsDoNotExistException;
 import com.github.manerajona.cinema.domain.events.MovieSessionCreatedEvent;
 import com.github.manerajona.cinema.domain.events.SeatsBookedEvent;
 import com.github.manerajona.cinema.domain.vo.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
-import wvlet.airframe.ulid.ULID;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Aggregate
-@Getter
-@NoArgsConstructor
 public class MovieSessionAggregate {
 
     @AggregateIdentifier
@@ -33,9 +29,13 @@ public class MovieSessionAggregate {
     private Showtime showTime;
     private MovieId movieId;
     private ScreenId screenId;
-    private Set<Seat> seatingPlan;
+    private SeatingPlan seatingPlan;
     private Set<Booking> bookings;
     private long aggregateVersion;
+
+    // No‑arg constructor required for event sourcing rehydration
+    protected MovieSessionAggregate() {
+    }
 
     @CommandHandler
     public MovieSessionAggregate(CreateMovieSessionCommand command) {
@@ -62,9 +62,11 @@ public class MovieSessionAggregate {
     @CommandHandler
     public void handle(BookSeatsCommand command) {
         // Validate that all requested seats exist
-        if (!seatingPlan.containsAll(command.requestedSeats())) {
-            Set<Seat> nonExistingSeats = new HashSet<>(command.requestedSeats());
-            nonExistingSeats.removeAll(seatingPlan);
+        Set<Seat> nonExistingSeats = command.requestedSeats().stream()
+                .filter(seat -> seat.row() > seatingPlan.maxRow() || seat.col() > seatingPlan.maxCol())
+                .collect(Collectors.toSet());
+
+        if (!nonExistingSeats.isEmpty()) {
             throw new SeatsDoNotExistException(nonExistingSeats);
         }
 
@@ -79,10 +81,8 @@ public class MovieSessionAggregate {
         }
 
         // Generate booking reference
-        BookingRef bookingRef = new BookingRef(ULID.newULID());
-
-        // Create booking with a maximum of 10 seats allowed
-        Booking booking = Booking.create(bookingRef, command.customerId(), command.requestedSeats(), 10);
+        final String bookCode = Long.toHexString(System.currentTimeMillis()).toUpperCase(Locale.ROOT);
+        BookingRef bookingRef = new BookingRef(bookCode);
 
         // Apply the event to record the booking
         AggregateLifecycle.apply(new SeatsBookedEvent(LocalDate.now(), this.id, bookingRef, command.customerId(), command.requestedSeats()));
@@ -90,7 +90,7 @@ public class MovieSessionAggregate {
 
     @EventSourcingHandler
     public void on(SeatsBookedEvent event) {
-        Booking booking = Booking.reconstitute(event.bookingRef(), event.customerId(), event.seats());
+        Booking booking = Booking.create(event.bookingRef(), event.customerId(), event.seats());
         this.bookings.add(booking);
         this.aggregateVersion++;
     }

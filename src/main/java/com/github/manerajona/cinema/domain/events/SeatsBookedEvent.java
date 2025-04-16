@@ -13,5 +13,5 @@ public record SeatsBookedEvent(
         MovieSessionId movieSessionId,
         BookingRef bookingRef,
         CustomerId customerId,
-        Set<Seat> seats) {
+        Set<Seat> seats) implements DomainEvent {
 }
