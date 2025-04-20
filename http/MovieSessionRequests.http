@@ -1,0 +1,33 @@
+### Create Movie Session
+POST http://localhost:8080/movie-sessions
+Content-Type: application/json
+
+{
+  "movieTitle": "Alien",
+  "screenNumber": 8,
+  "showtimeDate": "2025-04-16",
+  "showtimeTime": "14:30:00",
+  "seatsMaxCol": "M",
+  "seatsMaxRow": 25
+}
+
+### Book Seats
+POST http://localhost:8080/movie-sessions/81d33b81-a6b1-4c4f-bb9b-cb1645fd25c3/bookings
+Content-Type: application/json
+
+{
+  "customerEmail": "joe@example.com",
+  "requestedSeats": [
+    {
+      "col": "B",
+      "row": 10
+    },
+    {
+      "col": "B",
+      "row": 11
+    }
+  ]
+}
+
+### Get Booking by Code
+GET http://localhost:8080/movie-sessions/81d33b81-a6b1-4c4f-bb9b-cb1645fd25c3/bookings/196532587D7
